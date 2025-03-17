@@ -1,11 +1,14 @@
 # Kubernetes
+
 **Source Code: 
-https://github.com/Widhi-yahya/kubernetes_installation_docker** 
+https://github.com/Widhi-yahya/kubernetes_installation_docker**
+ 
 **Dokumentasi Github:** 
+
 **VM nama Worker-Ubuntu sebagai control plane**
 (seharusnya VM Master sebagai control, namun kami salah run untuk control plane di VM nama Worker)
 
-##1. Menginstall Docker dan Kubernetes Repository
+## 1. Menginstall Docker dan Kubernetes Repository
 
 ```bash
 wget -O - https://download.docker.com/linux/ubuntu/gpg > ./docker.key
