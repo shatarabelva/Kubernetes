@@ -19,8 +19,8 @@ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubun
 sudo apt update -y
 sudo apt install git wget curl socat -y
 sudo apt install -y docker-ce
+```
 
----
 ## 2. Menginstal cri-dockerd untuk Docker Support di Kubernetes
 
 ```bash
