@@ -35,8 +35,8 @@ sudo sed -i -e 's,/usr/bin/cri-dockerd,/usr/local/bin/cri-dockerd,' /etc/systemd
 sudo systemctl daemon-reload
 sudo systemctl enable cri-docker.service
 sudo systemctl enable --now cri-docker.socket
+```
 
----
 ## 3. Menginstall Kubernetes (kubelet, kubeadm, kubectl)
 
 ```bash
@@ -45,8 +45,8 @@ echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.
 sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold docker-ce kubelet kubeadm kubectl
+```
 
----
 ## 4. Mengatur Networking & Kernel Module
 
 ```bash
@@ -65,15 +65,15 @@ net.ipv4.ip_forward                 = 1
 EOF
 
 sudo sysctl --system
+```
 
----
 ## 5. Menonaktifkan SWAP
 
 ```bash
 sudo swapoff -a
 sudo vim /etc/fstab  # Komentari baris yang mengandung "swap.img"
+```
 
----
 ## 6. Menginisialisasi Kubernetes Cluster
 
 ```bash
@@ -82,30 +82,30 @@ sudo kubeadm init --apiserver-advertise-address=192.168.176.233/24 --cri-socket 
 
 # atau jika menggunakan jaringan 10.244.x.x
 sudo kubeadm init --apiserver-advertise-address=<control_plane_ip> --cri-socket unix:///var/run/cri-dockerd.sock --pod-network-cidr=10.244.0.0/16
+```
 
----
 ## 7. Mengatur kubectl untuk pengguna saat ini
 
 ```bash
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
+```
 
----
 ## 8. Menginstall Calico Network Plogin
 
 ```bash
 kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.2/manifests/tigera-operator.yaml
 curl https://raw.githubusercontent.com/projectcalico/calico/v3.28.2/manifests/custom-resources.yaml -O
 kubectl create -f custom-resources.yaml
+```
 
----
 ## 9. Mengecek Status Node
 
 ```bash
 kubectl get nodes
+```
 
----
 ## 10. Menginstall Metrics Server
 
 ```bash
@@ -114,5 +114,64 @@ cd kubernetes_installation_docker/
 kubectl apply -f metrics-server.yaml
 cd
 rm -rf kubernetes_installation_docker/
- 
+``` 
+
+## 11. Menginstall Kubernetes Dashboard
+
+```bash
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod +x get_helm.sh
+./get_helm.sh
+helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+helm repo list
+helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
+kubectl get pods,svc -n kubernetes-dashboard
+```
+
+## 12. Mengekspos Dashboard
+
+```bash
+kubectl expose deployment kubernetes-dashboard-kong --name k8s-dash-svc --type NodePort --port 443 --target-port 8443 -n kubernetes-dashboard
+kubectl get pods,svc -n kubernetes-dashboard
+```
+
+## 13. Membuat Service Account dan Token untuk Login ke Dashboard
+
+```bash
+nano k8s-dash.yaml
+
+
+isi file dengan: apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: widhi
+  namespace: kube-system
 ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: widhi-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: widhi
+  namespace: kube-system
+```
+
+## 14. Hasil Token untuk Join Nodes Lain didapatkan setelah init control plane
+
+```bash
+sudo kubeadm join 192.168.176.233:6443 --token tuiifo.o2bqqit5pv9u22ro \
+    --cri-socket unix:///var/run/cri-dockerd.sock \
+    --discovery-token-ca-cert-hash sha256:e9f49391d3e515bb11ba9e8b5c690e73a44a5fd10ad05be62865cc2346234f9c
+```
+
+## 15. Melihat Apakah Sudah Join
+
+```bash
+kubectl get nodes
+```
+ 
