@@ -20,7 +20,7 @@ sudo apt update -y
 sudo apt install git wget curl socat -y
 sudo apt install -y docker-ce
 
-
+---
 ## 2. Menginstal cri-dockerd untuk Docker Support di Kubernetes
 
 ```bash
@@ -36,7 +36,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable cri-docker.service
 sudo systemctl enable --now cri-docker.socket
 
-
+---
 ## 3. Menginstall Kubernetes (kubelet, kubeadm, kubectl)
 
 ```bash
@@ -46,7 +46,7 @@ sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
 sudo apt-mark hold docker-ce kubelet kubeadm kubectl
 
-
+---
 ## 4. Mengatur Networking & Kernel Module
 
 ```bash
@@ -66,15 +66,14 @@ EOF
 
 sudo sysctl --system
 
-
-
+---
 ## 5. Menonaktifkan SWAP
 
 ```bash
 sudo swapoff -a
 sudo vim /etc/fstab  # Komentari baris yang mengandung "swap.img"
 
-
+---
 ## 6. Menginisialisasi Kubernetes Cluster
 
 ```bash
@@ -84,7 +83,7 @@ sudo kubeadm init --apiserver-advertise-address=192.168.176.233/24 --cri-socket 
 # atau jika menggunakan jaringan 10.244.x.x
 sudo kubeadm init --apiserver-advertise-address=<control_plane_ip> --cri-socket unix:///var/run/cri-dockerd.sock --pod-network-cidr=10.244.0.0/16
 
-
+---
 ## 7. Mengatur kubectl untuk pengguna saat ini
 
 ```bash
@@ -92,7 +91,7 @@ mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
-
+---
 ## 8. Menginstall Calico Network Plogin
 
 ```bash
@@ -100,13 +99,13 @@ kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.2
 curl https://raw.githubusercontent.com/projectcalico/calico/v3.28.2/manifests/custom-resources.yaml -O
 kubectl create -f custom-resources.yaml
 
-
+---
 ## 9. Mengecek Status Node
 
 ```bash
 kubectl get nodes
 
-
+---
 ## 10. Menginstall Metrics Server
 
 ```bash
@@ -116,3 +115,4 @@ kubectl apply -f metrics-server.yaml
 cd
 rm -rf kubernetes_installation_docker/
  
+---
